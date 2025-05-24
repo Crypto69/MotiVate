@@ -40,8 +40,8 @@ struct Provider: TimelineProvider {
         Task {
             let currentEntry = await fetchMotivationEntry() // RESTORED CALL
             // For this widget, we'll refresh according to the policy.
-            // Let's set a refresh policy, e.g., 15 minutes from now or .atEnd
-            let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+            // Let's set a refresh policy, e.g., 1 minutes from now or .atEnd
+            let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 1, to: Date())!
             let timeline = Timeline(entries: [currentEntry], policy: .after(nextUpdateDate))
             // Simplified log for successful timeline creation
             print("Provider: getTimeline - created timeline. Entry date: \(currentEntry.date), Has image data: \(currentEntry.imageData != nil), Error: \(currentEntry.errorMessage ?? "nil")")

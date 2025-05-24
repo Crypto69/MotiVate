@@ -11,7 +11,7 @@ The application is a macOS widget that displays daily motivational images fetche
 - 📱 macOS Widget Support (Small, Medium, Large sizes)
 - 🖼️ Dynamic motivational image loading
 - 🎨 Static preview images for widget gallery
-- 🔄 Automatic refresh every 15 minutes
+- 🔄 Automatic refresh every 1 minutes
 - ⚡ Supabase integration for image storage
 - 🛠️ Debug logging for development
 
