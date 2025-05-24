@@ -1,6 +1,10 @@
 # MotiVate - macOS Motivational Widget
 
-A macOS widget that displays daily motivational images fetched from Supabase, providing inspiration right on your desktop.
+A few years ago I suffered a tragic accident T=that left me paralysed from the shoulders down. There is so much about having a spinal-cord injury that most people most people (god willing) never know about.
+
+I developed this To display uplifting and motivating messages to help those suffering Chronic pain And mental anguish associated to this kind of injury.
+
+The application is a macOS widget that displays daily motivational images fetched from Supabase, providing inspiration right on your desktop.
 
 ## Features
 
