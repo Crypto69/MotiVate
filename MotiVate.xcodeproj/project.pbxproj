@@ -6,14 +6,77 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1779A77E2DDC6DC10035836C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1779A77D2DDC6DC10035836C /* WidgetKit.framework */; };
+		1779A77F2DDC6DC10035836C /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1779A7632DDC6BDD0035836C /* SwiftUI.framework */; };
+		1779A78B2DDC6DC20035836C /* MotivationWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1779A77C2DDC6DC10035836C /* MotivationWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1779A7972DDC76BE0035836C /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 1779A7962DDC76BE0035836C /* Supabase */; };
+		1779A7992DDC76CE0035836C /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 1779A7982DDC76CE0035836C /* Supabase */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1779A7892DDC6DC20035836C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1779A7432DDC6B110035836C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1779A77B2DDC6DC10035836C;
+			remoteInfo = MotivationWidgetExtensionExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1779A7772DDC6BDE0035836C /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1779A78B2DDC6DC20035836C /* MotivationWidgetExtensionExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		1779A74B2DDC6B110035836C /* MotiVate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MotiVate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1779A7632DDC6BDD0035836C /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		1779A77C2DDC6DC10035836C /* MotivationWidgetExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MotivationWidgetExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1779A77D2DDC6DC10035836C /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1779A78C2DDC6DC20035836C /* Exceptions for "MotivationWidgetExtension" folder in "MotivationWidgetExtensionExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1779A77B2DDC6DC10035836C /* MotivationWidgetExtensionExtension */;
+		};
+		1779A7952DDC72360035836C /* Exceptions for "MotiVate" folder in "MotivationWidgetExtensionExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				core/SupabaseClient.swift,
+			);
+			target = 1779A77B2DDC6DC10035836C /* MotivationWidgetExtensionExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		1779A74D2DDC6B110035836C /* MotiVate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1779A7952DDC72360035836C /* Exceptions for "MotiVate" folder in "MotivationWidgetExtensionExtension" target */,
+			);
 			path = MotiVate;
+			sourceTree = "<group>";
+		};
+		1779A7802DDC6DC10035836C /* MotivationWidgetExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1779A78C2DDC6DC20035836C /* Exceptions for "MotivationWidgetExtension" folder in "MotivationWidgetExtensionExtension" target */,
+			);
+			path = MotivationWidgetExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +86,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1779A7972DDC76BE0035836C /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1779A7792DDC6DC10035836C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1779A77F2DDC6DC10035836C /* SwiftUI.framework in Frameworks */,
+				1779A77E2DDC6DC10035836C /* WidgetKit.framework in Frameworks */,
+				1779A7992DDC76CE0035836C /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +107,8 @@
 			isa = PBXGroup;
 			children = (
 				1779A74D2DDC6B110035836C /* MotiVate */,
+				1779A7802DDC6DC10035836C /* MotivationWidgetExtension */,
+				1779A7602DDC6BDC0035836C /* Frameworks */,
 				1779A74C2DDC6B110035836C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +117,18 @@
 			isa = PBXGroup;
 			children = (
 				1779A74B2DDC6B110035836C /* MotiVate.app */,
+				1779A77C2DDC6DC10035836C /* MotivationWidgetExtensionExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		1779A7602DDC6BDC0035836C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1779A7632DDC6BDD0035836C /* SwiftUI.framework */,
+				1779A77D2DDC6DC10035836C /* WidgetKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,20 +141,46 @@
 				1779A7472DDC6B110035836C /* Sources */,
 				1779A7482DDC6B110035836C /* Frameworks */,
 				1779A7492DDC6B110035836C /* Resources */,
+				1779A7772DDC6BDE0035836C /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1779A78A2DDC6DC20035836C /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				1779A74D2DDC6B110035836C /* MotiVate */,
 			);
 			name = MotiVate;
 			packageProductDependencies = (
+				1779A7962DDC76BE0035836C /* Supabase */,
 			);
 			productName = MotiVate;
 			productReference = 1779A74B2DDC6B110035836C /* MotiVate.app */;
 			productType = "com.apple.product-type.application";
+		};
+		1779A77B2DDC6DC10035836C /* MotivationWidgetExtensionExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1779A78D2DDC6DC20035836C /* Build configuration list for PBXNativeTarget "MotivationWidgetExtensionExtension" */;
+			buildPhases = (
+				1779A7782DDC6DC10035836C /* Sources */,
+				1779A7792DDC6DC10035836C /* Frameworks */,
+				1779A77A2DDC6DC10035836C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1779A7802DDC6DC10035836C /* MotivationWidgetExtension */,
+			);
+			name = MotivationWidgetExtensionExtension;
+			packageProductDependencies = (
+				1779A7982DDC76CE0035836C /* Supabase */,
+			);
+			productName = MotivationWidgetExtensionExtension;
+			productReference = 1779A77C2DDC6DC10035836C /* MotivationWidgetExtensionExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -83,6 +195,9 @@
 					1779A74A2DDC6B110035836C = {
 						CreatedOnToolsVersion = 16.3;
 					};
+					1779A77B2DDC6DC10035836C = {
+						CreatedOnToolsVersion = 16.3;
+					};
 				};
 			};
 			buildConfigurationList = 1779A7462DDC6B110035836C /* Build configuration list for PBXProject "MotiVate" */;
@@ -94,18 +209,29 @@
 			);
 			mainGroup = 1779A7422DDC6B110035836C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1779A75A2DDC6B5E0035836C /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1779A74C2DDC6B110035836C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				1779A74A2DDC6B110035836C /* MotiVate */,
+				1779A77B2DDC6DC10035836C /* MotivationWidgetExtensionExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1779A7492DDC6B110035836C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1779A77A2DDC6DC10035836C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +248,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1779A7782DDC6DC10035836C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1779A78A2DDC6DC20035836C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1779A77B2DDC6DC10035836C /* MotivationWidgetExtensionExtension */;
+			targetProxy = 1779A7892DDC6DC20035836C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1779A7552DDC6B130035836C /* Debug */ = {
@@ -250,6 +391,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = MotiVate/MotiVate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -258,6 +400,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MotiVate;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -277,6 +421,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = MotiVate/MotiVate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -285,6 +430,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MotiVate;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -294,6 +441,66 @@
 				PRODUCT_BUNDLE_IDENTIFIER = myaccessibility.ai.MotiVate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		1779A78E2DDC6DC20035836C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MotivationWidgetExtension/MotivationWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 4R94388LH8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MotivationWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MotivationWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = myaccessibility.ai.MotiVate.MotivationWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1779A78F2DDC6DC20035836C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MotivationWidgetExtension/MotivationWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 4R94388LH8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MotivationWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MotivationWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = myaccessibility.ai.MotiVate.MotivationWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -320,7 +527,40 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		1779A78D2DDC6DC20035836C /* Build configuration list for PBXNativeTarget "MotivationWidgetExtensionExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1779A78E2DDC6DC20035836C /* Debug */,
+				1779A78F2DDC6DC20035836C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1779A75A2DDC6B5E0035836C /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1779A7962DDC76BE0035836C /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1779A75A2DDC6B5E0035836C /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		1779A7982DDC76CE0035836C /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1779A75A2DDC6B5E0035836C /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1779A7432DDC6B110035836C /* Project object */;
 }
