@@ -7,6 +7,15 @@
 
 import WidgetKit
 import SwiftUI // For potential use, though not strictly necessary here
+import Supabase // Required for RPC calls
+
+// Define the structure for the RPC response
+struct ImageResponse: Decodable, Identifiable {
+    let id: Int64
+    let image_url: String
+    let likes_count: Int
+    let dislikes_count: Int
+}
 
 struct Provider: TimelineProvider {
     // Explicit initializer to check if Provider is even being created
@@ -38,7 +47,7 @@ struct Provider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<MotivationEntry>) -> Void) {
         print("Provider: getTimeline called. Family: \(context.family), isPreview: \(context.isPreview). Will call fetchMotivationEntry.") // Simplified log
         Task {
-            let currentEntry = await fetchMotivationEntry() // RESTORED CALL
+            let currentEntry = await fetchMotivationEntry()
             // For this widget, we'll refresh according to the policy.
             // Let's set a refresh policy, e.g., 1 minutes from now or .atEnd
             let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 1, to: Date())!
@@ -49,22 +58,43 @@ struct Provider: TimelineProvider {
         }
     }
 
-    // Helper function - RESTORING to original implementation
     private func fetchMotivationEntry() async -> MotivationEntry {
-        print("Provider: fetchMotivationEntry() called.") // Simplified log
+        print("Provider: fetchMotivationEntry() called.")
         var downloadedImageData: Data? = nil
+        
+        // --- TEMPORARY TEST: Force category ID 2 ---
+        // let appGroupID = "group.ai.myaccessibility.motivate"
+        // let userDefaults = UserDefaults(suiteName: appGroupID)
+        // let selectedCategoryIDsStrings = userDefaults?.stringArray(forKey: "selectedCategoryIDs") ?? []
+        // let categoryIDsForRPC_original: [Int64]? = selectedCategoryIDsStrings.isEmpty ? nil : selectedCategoryIDsStrings.compactMap { Int64($0) }
+        let categoryIDsForRPC: [Int64]? = [2] // Force category ID 2 for testing
+        // --- END TEMPORARY TEST ---
+
+        print("Provider: fetchMotivationEntry - Selected category IDs for RPC: \(categoryIDsForRPC?.map { String($0) }.joined(separator: ", ") ?? "None (fully random)")")
 
         do {
-            let url = try await SupabaseClient.shared.randomImageURL()
-             // Log only last part of URL for brevity, SupabaseClient already logs the full one.
-            print("Provider: fetchMotivationEntry - Fetched URL ending with: \(url.lastPathComponent)")
+            // Call the RPC function "get_random_image"
+            // Assuming SupabaseClient.shared.client is the Supabase.SupabaseClient instance
+            let imageResponseData: ImageResponse = try await SupabaseClient.shared.client
+                .rpc("get_random_image", params: ["category_ids": categoryIDsForRPC])
+                .single() // Expecting a single row from the function
+                .execute()
+                .value
+            
+            print("Provider: fetchMotivationEntry - RPC Response: ID \(imageResponseData.id), Filename \(imageResponseData.image_url)")
+
+            guard let imageURL = SupabaseClient.shared.publicImageURL(filename: imageResponseData.image_url) else {
+                print("Provider: fetchMotivationEntry - Failed to construct full URL for filename: \(imageResponseData.image_url) using SupabaseClient helper")
+                throw MotivDBError.urlConversionFailed
+            }
+            
+            print("Provider: fetchMotivationEntry - Constructed full URL via SupabaseClient helper: \(imageURL.absoluteString)")
 
             // --- Manual Download ---
-            // print("Provider: fetchMotivationEntry - Attempting manual download...") // Verbose, can be enabled if needed
             do {
-                let (data, response) = try await URLSession.shared.data(from: url)
+                let (data, response) = try await URLSession.shared.data(from: imageURL)
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                     print("Provider: fetchMotivationEntry - Downloaded \(data.count) bytes.")
+                    print("Provider: fetchMotivationEntry - Downloaded \(data.count) bytes.")
                     downloadedImageData = data
                 } else if let httpResponse = response as? HTTPURLResponse {
                     print("Provider: fetchMotivationEntry - Download FAILED. Status: \(httpResponse.statusCode)")
@@ -72,20 +102,18 @@ struct Provider: TimelineProvider {
                     print("Provider: fetchMotivationEntry - Download FAILED. No HTTP response.")
                 }
             } catch {
-                // Log only the localized description for brevity
                 print("Provider: fetchMotivationEntry - Download FAILED. Error: \(error.localizedDescription)")
+                // Keep downloadedImageData as nil
             }
-            return MotivationEntry(date: Date(), imageURL: url, imageData: downloadedImageData)
+            // Note: MotivationEntry does not currently store image ID, likes, or dislikes.
+            // This is fine for Phase One.
+            return MotivationEntry(date: Date(), imageURL: imageURL, imageData: downloadedImageData)
         } catch let error as MotivDBError {
-            // Log only the localized description
             print("Provider: fetchMotivationEntry - MotivDBError: \(error.localizedDescription)")
-            return MotivationEntry(date: Date(), errorMessage: "DB Error") // Shorter error message for display
+            return MotivationEntry(date: Date(), errorMessage: "DB Error")
         } catch {
-            // Log only the localized description
-            print("Provider: fetchMotivationEntry - Generic error: \(error.localizedDescription)")
-            return MotivationEntry(date: Date(), errorMessage: "Fetch Error") // Shorter error message for display
+            print("Provider: fetchMotivationEntry - RPC or other error: \(error.localizedDescription)")
+            return MotivationEntry(date: Date(), errorMessage: "Fetch Error")
         }
     }
-
-
 } // Closing brace for struct Provider

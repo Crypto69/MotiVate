@@ -38,31 +38,33 @@ CREATE TABLE public.image_categories (
 ```
 
 ### 2. Backend API
-
-Expose two new endpoints (via Supabase Edge Functions or PostgREST):
-
-1. **List all categories**  
+ 
+We will expose functionality through a combination of PostgREST for direct table access and a PostgreSQL Remote Procedure Call (RPC) for custom logic.
+ 
+1. **List all categories** (via PostgREST)
    ```
-   GET /categories
+   GET /rest/v1/categories
    → [{ id, name, description }, …]
    ```
-
-2. **Fetch a random image by category set**  
-   ```
-   GET /images/random?categories[]=1&categories[]=2 -- Example using category IDs
-   → { id, image_url, likes_count, dislikes_count }
-   ```
-   - If no `categories[]` query params → fallback to fully random.
-
-#### Suggested SQL for random-pick:
-```sql
-SELECT i.id, i.image_url, i.likes_count, i.dislikes_count
-  FROM public.images i
-  JOIN public.image_categories ic ON ic.image_id = i.id
- WHERE ic.category_id = ANY($1::bigint[])
-ORDER BY random()
-   LIMIT 1;
-```
+   *(This assumes RLS is set up appropriately for the `categories` table.)*
+ 
+2. **Fetch a random image by category set** (via RPC)
+   - This will be handled by calling the `get_random_image(category_ids bigint[])` PostgreSQL function directly from the client using Supabase's RPC mechanism.
+   - **Input:** An array of category IDs (or `NULL` for fully random).
+   - **Output:** `{ id, image_url, likes_count, dislikes_count }`
+   - The SQL for this function is defined as:
+     ```sql
+     CREATE OR REPLACE FUNCTION get_random_image(category_ids bigint[] DEFAULT NULL)
+     RETURNS TABLE (
+         id bigint,
+         image_url text,
+         likes_count integer,
+         dislikes_count integer
+     )
+     -- ... (rest of function definition)
+     ```
+ 
+   *(The `get_random_image` function has already been implemented.)*
 
 ### 3. Widget UI Changes
 
@@ -79,22 +81,46 @@ ORDER BY random()
    - In your host app’s settings screen (or in Intent UI on macOS 14+), display a list of checkboxes. Each checkbox should display the category's `name` and be associated with its `id`.
    - Persist the selected category `id`s (e.g., as an array of strings, like `["1", "2"]`) to `UserDefaults(suiteName:)` under the App Group, using a key like `"selectedCategoryIDs"`.
 
-3. **TimelineProvider**  
+3. **TimelineProvider**
    - Read `selectedCategoryIDs: [String]` (or your chosen key) from App Group defaults.
-   - Call your `/images/random` endpoint with that array.  
-   - Fallback to no-args fetch if the array is empty.
-
-4. **Example SwiftUI filter logic**:
+   - Convert string IDs to `Int` or `Int64` as appropriate for the RPC call.
+   - Call the `get_random_image` PostgreSQL function via RPC, passing the selected category IDs (or `nil` if empty).
+ 
+4. **Example SwiftUI RPC call logic**:
    ```swift
-   let selectedCategoryIDs = UserDefaults(suiteName: groupID)?
-     .stringArray(forKey: "selectedCategoryIDs") ?? [] // Ensure key matches persistence
-
-   // ... then use selectedCategoryIDs to build the URL query
-   // Example: + (selectedCategoryIDs.isEmpty ? "" : "?"+selectedCategoryIDs.map{"categories[]=\($0)"}.joined(separator: "&"))
-
-   let url = URL(string: "https://vwvhpnxnumfvxasbopcq.supabase.co/functions/v1/images-random"
-     + (selected.isEmpty ? "" : "?"+selected.map{"categories[]=\($0)"}.joined(separator: "&"))
-   )!
+   // Assuming 'supabase' is your configured SupabaseClient instance
+   // and 'ImageResponse' is a Decodable struct matching the function's output
+   
+   struct ImageResponse: Decodable, Identifiable {
+       let id: Int64 // Or Int, depending on your DB schema
+       let image_url: String
+       let likes_count: Int
+       let dislikes_count: Int
+   }
+   
+   let selectedCategoryIDsStrings = UserDefaults(suiteName: groupID)?
+     .stringArray(forKey: "selectedCategoryIDs") ?? []
+   
+   let categoryIDsForRPC: [Int64]? = selectedCategoryIDsStrings.isEmpty ? 
+       nil : 
+       selectedCategoryIDsStrings.compactMap { Int64($0) }
+   
+   // If compactMap results in an empty array but selectedCategoryIDsStrings was not empty,
+   // it means there were non-integer strings. Handle this case as needed.
+   // For simplicity here, we assume valid integer strings or an empty initial array.
+   
+   do {
+       let imageResponse: ImageResponse = try await supabase
+           .rpc("get_random_image", params: ["category_ids": categoryIDsForRPC]) // Pass nil if no categories
+           .select() // Required to get the row data
+           .single() // Expecting a single row
+           .execute()
+           .value
+       // Use imageResponse
+   } catch {
+       // Handle error
+       print("Error fetching random image: \(error)")
+   }
    ```
 
 ---
@@ -158,30 +184,30 @@ HStack {
 
 ---
 
-## 🏛️ Architectural Review &amp; Commentary
+## 🏛️ Architectural Review & Commentary
 
 This architecture plan provides a solid foundation for enhancing the Motivational Images Widget. The phased approach is practical, and the technical details for database, API, and UI changes are well-considered.
 
 **Key Strengths:**
 
 *   **Clear Phased Rollout:** Separating category implementation (Phase One) from feedback mechanisms (Phase Two) allows for iterative development and testing.
-*   **Modern Backend Choice:** Leveraging Supabase for database, authentication (implicitly, for future user-specific features), and serverless functions (Edge Functions for APIs, RPC for atomic DB operations) is a scalable and developer-friendly approach.
+*   **Modern Backend Choice:** Leveraging Supabase for database, authentication (implicitly, for future user-specific features), and PostgreSQL RPC functions for custom database logic is a scalable and developer-friendly approach.
 *   **Platform Awareness:** The plan correctly identifies the need for interactive widget capabilities (macOS 14+) and provides fallbacks/alternative approaches for older macOS versions.
 *   **Data Sharing:** The use of App Groups for sharing data (like selected categories) between the main app and the widget extension is the correct mechanism on macOS.
 
 **Alignment with Current Project Setup:**
 
-*   **Supabase Client:** The project's `MotiVate/core/SupabaseClient.swift` is already configured with the correct Supabase project URL (`https://vwvhpnxnumfvxasbopcq.supabase.co`) and public anonymous key. This means direct Supabase SDK calls from Swift (e.g., for fetching categories or invoking RPCs) will work as intended.
-*   **API Endpoint Update:** The example URL for the custom `/images/random` endpoint in Phase One (Widget UI Changes, item 4) has been updated from a placeholder to the correct Supabase Edge Function URL: `https://vwvhpnxnumfvxasbopcq.supabase.co/functions/v1/images-random`. This assumes an Edge Function named `images-random` will be created.
+*   **Supabase Client:** The project's `MotiVate/core/SupabaseClient.swift` is already configured with the correct Supabase project URL (`https://vwvhpnxnumfvxasbopcq.supabase.co`) and public anonymous key. This means direct Supabase SDK calls from Swift (e.g., for fetching categories or invoking RPCs like `get_random_image` and `increment_feedback`) will work as intended.
+*   **API Approach:** The `/images/random` functionality will be accessed by directly calling the `get_random_image` PostgreSQL function via RPC from the Swift client, instead of through a Supabase Edge Function. This simplifies the backend architecture for this specific endpoint.
 
-**Important Implementation Notes (Reiteration &amp; Emphasis):**
+**Important Implementation Notes (Reiteration & Emphasis):**
 
 *   **App Group Identifier:** Ensure the `groupID` string used in `UserDefaults(suiteName: groupID)` is consistently defined and configured in the `.entitlements` files for both the main application target and the widget extension target.
 *   **Intent Definition File:** The `ImageFeedbackIntent.intentdefinition` file (Phase Two) must be created and correctly added to your main app target. It can also be part of a shared framework if you structure your project that way.
-*   **Supabase RPC Function:** The PostgreSQL function `increment_feedback(image_id bigint, liked boolean)` (Phase Two) needs to be created within your Supabase project's database schema.
-*   **SQL for Random Pick:** The SQL query for `GET /images/random` is suitable for an Edge Function. Ensure appropriate database indexing on `image_categories.category_id` and `images.id` for performance.
-*   **Error Handling &amp; UX:** While mentioned under "Next Steps," robust error handling for API calls (category fetch, image fetch, feedback submission) and clear user feedback (e.g., loading states, error messages/placeholders) should be integrated throughout development.
-*   **Security for Edge Functions/RPCs:** Review Row Level Security (RLS) policies on your Supabase tables. Ensure that any Edge Functions or RPCs are designed with appropriate authorization if they perform sensitive operations or modify data. The `increment_feedback` RPC, for example, should be callable by users but protected against abuse if possible (e.g., rate limiting, or ensuring `image_id` is valid).
+*   **Supabase RPC Functions:** The PostgreSQL functions `get_random_image(category_ids bigint[])` (Phase One) and `increment_feedback(image_id bigint, liked boolean)` (Phase Two) need to be created (or confirmed to exist) within your Supabase project's database schema and be callable via RPC.
+*   **Database Indexing:** Ensure appropriate database indexing on `image_categories.category_id` and `images.id` for performance of the `get_random_image` function.
+*   **Error Handling & UX:** While mentioned under "Next Steps," robust error handling for API calls (category fetch, image fetch via RPC, feedback submission via RPC) and clear user feedback (e.g., loading states, error messages/placeholders) should be integrated throughout development.
+*   **Security for RPCs:** Review Row Level Security (RLS) policies on your Supabase tables. Ensure that RPCs are designed with appropriate authorization. The `get_random_image` and `increment_feedback` RPCs should be callable by `anon` users as per previous discussions, but ensure the underlying tables (`images`, `categories`, `image_categories`) have appropriate RLS for read access if needed, and that the functions themselves don't inadvertently expose or modify data they shouldn't. The `SECURITY DEFINER` clause in the functions means they run with the permissions of the user who defined them, so ensure this definer role has the minimum necessary privileges.
 
 This commentary aims to reinforce the plan's strengths and highlight key areas for attention during implementation.
 ## 📈 Next Steps & Considerations

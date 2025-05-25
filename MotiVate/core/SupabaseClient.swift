@@ -17,7 +17,18 @@ enum MotivDBError: Error {
 struct SupabaseClient {
     static let shared = SupabaseClient() // Singleton instance
 
-    private let client: Supabase.SupabaseClient
+    // Public constants for storage configuration
+    public static let imageBucketName = "motivational-images"
+    // Note: The leading and trailing slashes are important for URL construction.
+    // The base Supabase URL already ends without a slash.
+    // The bucket name is followed by a slash, then the filename.
+    public static let imageStoragePublicPath = "storage/v1/object/public/" // No leading slash if appended to URL.absoluteString
+
+    // Make client accessible for RPC calls from other modules if needed,
+    // or consider adding specific RPC helper methods here.
+    // For now, assuming direct access is intended as per Provider.swift usage.
+    let client: Supabase.SupabaseClient // Changed from private to internal (default) or public if needed
+    let baseURL: URL // Store the base URL for internal use
 
     private init() { // Private initializer for singleton
         // --- ⚠️ IMPORTANT: REPLACE WITH YOUR ACTUAL SUPABASE DETAILS ---
@@ -28,9 +39,10 @@ struct SupabaseClient {
         guard let supabaseURL = URL(string: supabaseURLString) else {
             fatalError("Invalid Supabase URL: \(supabaseURLString)")
         }
+        self.baseURL = supabaseURL // Store the validated URL
 
         self.client = Supabase.SupabaseClient(
-            supabaseURL: supabaseURL,
+            supabaseURL: self.baseURL, // Use the stored baseURL
             supabaseKey: supabaseAnonKeyString
         )
     }
@@ -71,5 +83,24 @@ struct SupabaseClient {
         // Alternative for a *private* bucket (not used in this plan but good to know):
         // This would require users to be authenticated.
         // return try await storage.createSignedURL(path: randomFile.name, expiresIn: 3600) // URL valid for 1 hour
+    }
+
+    /// Constructs the full public URL for a given image filename in the configured bucket.
+    public func publicImageURL(filename: String) -> URL? {
+        var components = URLComponents()
+        components.scheme = self.baseURL.scheme
+        components.host = self.baseURL.host
+        
+        // Construct the full path, ensuring it starts with a single leading slash
+        // and includes the double slash before the filename as per example.
+        // SupabaseClient.imageStoragePublicPath = "storage/v1/object/public/"
+        // SupabaseClient.imageBucketName = "motivational-images"
+        let constructedPath = "/" + SupabaseClient.imageStoragePublicPath + SupabaseClient.imageBucketName + "//" + filename
+        components.path = constructedPath
+        
+        // For debugging, uncomment to see the constructed parts:
+        // print("SupabaseClient: publicImageURL - Scheme: \(components.scheme ?? "nil"), Host: \(components.host ?? "nil"), Path: \(components.path ?? "nil"), Result URL: \(components.url?.absoluteString ?? "nil")")
+        
+        return components.url
     }
 }
