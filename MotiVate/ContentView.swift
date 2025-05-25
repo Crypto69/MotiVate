@@ -71,14 +71,24 @@ struct ContentView: View {
                 NavigationView {
                     CategorySettingsView()
                         .toolbar {
-                            ToolbarItem(placement: .confirmationAction) {
-                                Button("Done") {
+                            ToolbarItem(placement: .confirmationAction) { // .confirmationAction or .primaryAction is suitable
+                                Button { // Action
                                     showingCategorySettings = false
                                     // Optionally, refresh image after settings change
                                     Task {
                                         await viewModel.fetchMotivationalImage()
                                     }
+                                } label: { // Explicit label
+                                    Text("Done")
+                                        .font(.system(size: 13, weight: .semibold)) // Keep custom font for the button text
+                                        .padding(.horizontal, 12) // Add horizontal padding to the text
+                                        .padding(.vertical, 6)    // Add vertical padding to the text
                                 }
+                                .buttonStyle(.plain) // Use plain style to allow full background customization
+                                .background(Color.accentColor) // Set background to accent color
+                                .foregroundColor(.white) // Set text color to white for contrast
+                                .clipShape(RoundedRectangle(cornerRadius: 6)) // Apply rounded corners
+                                .keyboardShortcut(.defaultAction) // Allow Enter key to trigger it
                             }
                         }
                 }
