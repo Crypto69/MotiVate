@@ -83,7 +83,7 @@ struct ContentView: View {
                         }
                 }
                 // For macOS, adjust sheet size for better readability of category descriptions
-                .frame(minWidth: 600, idealWidth:700, maxWidth: 880, minHeight: 500, idealHeight: 600, maxHeight: 700)
+                .frame(minWidth: 540, idealWidth:540, maxWidth: 540, minHeight: 500, idealHeight: 600, maxHeight: 700)
             }
         }
     }

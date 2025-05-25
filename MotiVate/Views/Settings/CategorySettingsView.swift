@@ -40,6 +40,7 @@ struct CategorySettingsView: View {
                     // Removed .padding(.horizontal) from here; list section footers usually have some default insets.
             }
         }
+        .frame(maxWidth: .infinity) // Make the List expand to the full available width
         .navigationTitle("Widget Categories")
         .onAppear {
             // Only fetch categories if we don't already have them
