@@ -9,14 +9,9 @@ import WidgetKit
 import SwiftUI // For potential use, though not strictly necessary here
 import Supabase // Required for RPC calls
 
-// Define the structure for the RPC response
-struct ImageResponse: Decodable, Identifiable {
-    let id: Int64
-    let image_url: String
-    let likes_count: Int
-    let dislikes_count: Int
-}
-
+// ImageResponse struct is now defined in MotiVate/core/SharedModels.swift
+// Ensure SharedModels.swift is included in this widget extension's target membership.
+ 
 struct Provider: TimelineProvider {
     // Explicit initializer to check if Provider is even being created
     init() {
@@ -62,29 +57,28 @@ struct Provider: TimelineProvider {
         print("Provider: fetchMotivationEntry() called.")
         var downloadedImageData: Data? = nil
         
-        // --- TEMPORARY TEST: Force category ID 2 ---
-        // let appGroupID = "group.ai.myaccessibility.motivate"
-        // let userDefaults = UserDefaults(suiteName: appGroupID)
-        // let selectedCategoryIDsStrings = userDefaults?.stringArray(forKey: "selectedCategoryIDs") ?? []
-        // let categoryIDsForRPC_original: [Int64]? = selectedCategoryIDsStrings.isEmpty ? nil : selectedCategoryIDsStrings.compactMap { Int64($0) }
-        let categoryIDsForRPC: [Int64]? = [2] // Force category ID 2 for testing
-        // --- END TEMPORARY TEST ---
+        let appGroupID = "group.ai.myaccessibility.motivate"
+        let userDefaults = UserDefaults(suiteName: appGroupID)
+        
+        let selectedCategoryIDsStrings = userDefaults?.stringArray(forKey: "selectedCategoryIDs") ?? []
+        let categoryIDsForRPC: [Int64]? = selectedCategoryIDsStrings.isEmpty ? nil : selectedCategoryIDsStrings.compactMap { Int64($0) }
 
         print("Provider: fetchMotivationEntry - Selected category IDs for RPC: \(categoryIDsForRPC?.map { String($0) }.joined(separator: ", ") ?? "None (fully random)")")
 
         do {
             // Call the RPC function "get_random_image"
             // Assuming SupabaseClient.shared.client is the Supabase.SupabaseClient instance
-            let imageResponseData: ImageResponse = try await SupabaseClient.shared.client
+            // The type ImageResponse should now resolve from the shared MotiVate/core/SharedModels.swift
+            let imageResponse: ImageResponse = try await SupabaseClient.shared.client
                 .rpc("get_random_image", params: ["category_ids": categoryIDsForRPC])
                 .single() // Expecting a single row from the function
                 .execute()
                 .value
             
-            print("Provider: fetchMotivationEntry - RPC Response: ID \(imageResponseData.id), Filename \(imageResponseData.image_url)")
+            print("Provider: fetchMotivationEntry - RPC Response: ID \(imageResponse.id), Filename \(imageResponse.image_url)")
 
-            guard let imageURL = SupabaseClient.shared.publicImageURL(filename: imageResponseData.image_url) else {
-                print("Provider: fetchMotivationEntry - Failed to construct full URL for filename: \(imageResponseData.image_url) using SupabaseClient helper")
+            guard let imageURL = SupabaseClient.shared.publicImageURL(filename: imageResponse.image_url) else {
+                print("Provider: fetchMotivationEntry - Failed to construct full URL for filename: \(imageResponse.image_url) using SupabaseClient helper")
                 throw MotivDBError.urlConversionFailed
             }
             

@@ -73,7 +73,7 @@ We will expose functionality through a combination of PostgREST for direct table
    let categories = try await supabase
      .from("categories")
      .select()
-     .order(column: "name")
+     .order( "name")
      .execute()
    ```
 

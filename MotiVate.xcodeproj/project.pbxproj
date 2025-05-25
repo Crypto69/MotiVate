@@ -56,6 +56,7 @@
 		1779A7952DDC72360035836C /* Exceptions for "MotiVate" folder in "MotivationWidgetExtensionExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				core/SharedModels.swift,
 				core/SupabaseClient.swift,
 			);
 			target = 1779A77B2DDC6DC10035836C /* MotivationWidgetExtensionExtension */;

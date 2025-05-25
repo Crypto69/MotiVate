@@ -7,11 +7,12 @@
 import Supabase
 import Foundation
 
-// Custom error for clarity when fetching images
+// Custom error for clarity when fetching data
 enum MotivDBError: Error {
     case emptyBucket       // Bucket has no files
     case imageFetchFailed  // Could not fetch image URL
     case urlConversionFailed // Could not convert string to URL
+    case categoriesFetchFailed // Could not fetch categories
 }
 
 struct SupabaseClient {
@@ -102,5 +103,25 @@ struct SupabaseClient {
         // print("SupabaseClient: publicImageURL - Scheme: \(components.scheme ?? "nil"), Host: \(components.host ?? "nil"), Path: \(components.path ?? "nil"), Result URL: \(components.url?.absoluteString ?? "nil")")
         
         return components.url
+    }
+    
+    /// Fetches all categories from the 'categories' table.
+    /// - Returns: An array of `CategoryItem` objects ordered by name.
+    /// - Throws: `MotivDBError.categoriesFetchFailed` if the fetch operation fails.
+    public func fetchAllCategories() async throws -> [CategoryItem] {
+        do {
+            // Query the 'categories' table directly using PostgREST, following Supabase documentation pattern
+            let categories: [CategoryItem] = try await client.from("categories")
+                .select() // Fetches all columns by default
+                .order("name") // Sort alphabetically by name
+                .execute()
+                .value // Access the decoded value directly from the chained call
+            
+            print("SupabaseClient: fetchAllCategories - Successfully fetched \(categories.count) categories")
+            return categories
+        } catch {
+            print("SupabaseClient: fetchAllCategories - Error fetching categories: \(error.localizedDescription)")
+            throw MotivDBError.categoriesFetchFailed
+        }
     }
 }

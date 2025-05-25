@@ -5,7 +5,7 @@
 CREATE OR REPLACE FUNCTION get_random_image(category_ids bigint[] DEFAULT NULL)
 RETURNS TABLE (
     id bigint,
-    image_url text, hell make me
+    image_url text,
     likes_count integer,
     dislikes_count integer
 ) 
