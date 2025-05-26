@@ -6,18 +6,31 @@
 //
 import WidgetKit
 import SwiftUI
+import os // Import the os framework for Logger
 
 // This is the SwiftUI View for your widget
 struct MotivationWidgetEntryView : View {
+    // Create a logger instance for this view.
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "MotivationWidgetExtension", category: "MotivationWidgetEntryView")
     var entry: Provider.Entry // The data for this specific view instance
 
     var body: some View {
-        // DEBUG: Print the contents of the entry when the view is created
-        let _ = print("MotivationWidgetEntryView - Rendering with Entry: date=\(entry.date), staticImageName=\(entry.staticPreviewImageName ?? "nil"), imageDataPresent=\(entry.imageData != nil), imageURLPresent=\(entry.imageURL != nil), errorMessage=\(entry.errorMessage ?? "nil")")
+        // Log the entry details when the view is rendering using the `let _ = ...` pattern
+        let _ = Self.logger.debug("""
+            Rendering MotivationWidgetEntryView with Entry:
+            Date: \(self.entry.date.description),
+            ImageID: \(String(describing: self.entry.imageId)),
+            StaticImageName: \(self.entry.staticPreviewImageName ?? "nil"),
+            ImageDataPresent: \(self.entry.imageData != nil),
+            ImageURLPresent: \(self.entry.imageURL != nil),
+            ErrorMessage: \(self.entry.errorMessage ?? "nil")
+            """)
 
-        ZStack {
-            // NEW: Prioritize static preview image if available
-            if let staticImageName = entry.staticPreviewImageName {
+        ZStack(alignment: .bottomTrailing) { // Align feedback buttons to bottom trailing
+            // Group for the main image content
+            Group {
+                // NEW: Prioritize static preview image if available
+                if let staticImageName = entry.staticPreviewImageName {
                 Image(staticImageName) // Assumes "WidgetPreviewImage" is in Assets
                     .resizable()
                     .scaledToFit() // Or .fill, adjust as needed
@@ -48,12 +61,41 @@ struct MotivationWidgetEntryView : View {
                 Image("WidgetPreviewImage") // Directly use the asset name
                     .resizable()
                     .scaledToFit()
+                }
+            } // End of Group for main image content
+
+            // Overlay for Feedback Buttons
+            // Show buttons only if there's an imageId and actual imageData (i.e., not a static placeholder or error view)
+            // Show buttons only if there's an imageId (which is Int64?) and actual imageData.
+            // We also need to ensure we can convert imageId to Int for the SubmitFeedbackIntent.
+            if let imageId64 = entry.imageId,
+               let imageIdInt = Int(exactly: imageId64), // Safely convert Int64 to Int
+               entry.imageData != nil,
+               entry.staticPreviewImageName == nil,
+               entry.errorMessage == nil {
+                HStack(spacing: 10) { // Horizontal stack for buttons
+                    Button(intent: SubmitFeedbackIntent(imageId: imageIdInt, feedbackType: "like")) {
+                        Image(systemName: "hand.thumbsup.fill")
+                            .foregroundColor(.green) // Optional: Color the icon
+                    }
+                    .buttonStyle(.plain) // Use plain style for better appearance in widgets
+
+                    Button(intent: SubmitFeedbackIntent(imageId: imageIdInt, feedbackType: "dislike")) {
+                        Image(systemName: "hand.thumbsdown.fill")
+                            .foregroundColor(.red) // Optional: Color the icon
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(8) // Add some padding around the buttons
+                .background(.thinMaterial) // Add a subtle background for better visibility
+                .clipShape(Capsule()) // Make it rounded
+                .padding(10) // Padding from the ZStack edges
             }
         }
-        .widgetURL(URL(string: "motivationalwidget://open"))
+        .widgetURL(URL(string: "motivationalwidget://open")) // This makes the whole widget tappable to open the app
         .clipped()
         .containerBackground(for: .widget) {
-            Color.gray.opacity(0.1)
+            Color.gray.opacity(0.1) // Existing background
         }
     }
 }
@@ -82,17 +124,20 @@ struct MotivationWidget_Previews: PreviewProvider {
         
         let placeholderEntryWithData = MotivationEntry(
             date: Date(),
+            imageId: 123, // Example imageId for preview
             imageURL: nil,
             imageData: sampleImageData
         )
 
          let errorEntry = MotivationEntry(
             date: Date(),
+            imageId: nil, // No imageId for error entry
             errorMessage: "Preview Error: Image not found."
         )
         
         let loadingEntry = MotivationEntry(
             date: Date(),
+            imageId: nil, // No imageId for loading entry (as image isn't loaded yet)
             imageURL: URL(string: "https://example.com/loading.jpg"),
             imageData: nil,
             errorMessage: nil
