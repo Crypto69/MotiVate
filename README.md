@@ -9,7 +9,7 @@ The application is a macOS widget that displays daily motivational images fetche
 Here are some screenshots of MotiVate in action:
 
 ### Desktop Widget Views
-![Desktop Widget View 1](Documentation/Desktop1.jpeg)
+![Desktop Widget View 3](Documentation/Desktop3.jpeg)
 *Desktop widget showing a motivational quote*
 
 ![Desktop Widget View 2](Documentation/Desktop2.jpeg)
