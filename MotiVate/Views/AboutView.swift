@@ -29,7 +29,7 @@ struct AboutView: View {
 
             ScrollView {
                 Text("""
-Nineteen months ago, my life changed forever. What began as a beautiful evening in Paris during a business trip ended with a catastrophic spinal cord injury that left me paralysed from the shoulders down. In an instant, I went from walking through the streets of Paris to fighting for my life on a cold bathroom floor, barely able to breathe or call for help.
+In August of 2022, my life changed forever. What began as a beautiful evening in Paris during a business trip ended with a catastrophic spinal cord injury that left me paralysed from the shoulders down. In an instant, I went from walking through the streets of Paris to fighting for my life on a cold bathroom floor, barely able to breathe or call for help.
 
 What followed was months of survival, surgeries, intensive care, and the long road of rehabilitation. I endured searing pain, trauma, and moments of hopelessness that nearly broke me. But I also discovered something else: the power of the human spirit to endure.
 

@@ -94,7 +94,7 @@ struct ContentView: View {
             }
         } detail: {
             CategorySettingsView()
-                .frame(minWidth: 500, idealWidth: 550)
+                .frame(minWidth: 500, idealWidth: 550, minHeight: 500, idealHeight: 800)
                 .navigationTitle("Settings")
         }
         .sheet(isPresented: $appMenuState.showAbout) {

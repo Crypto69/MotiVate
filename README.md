@@ -6,6 +6,26 @@ I developed this To display uplifting and motivating messages to help those suff
 
 The application is a macOS widget that displays daily motivational images fetched from Supabase, providing inspiration right on your desktop.
 
+Here are some screenshots of MotiVate in action:
+
+### Desktop Widget Views
+![Desktop Widget View 1](Documentation/Desktop1.jpeg)
+*Desktop widget showing a motivational quote*
+
+![Desktop Widget View 2](Documentation/Desktop2.jpeg)
+*Multiple widget sizes on the desktop*
+
+### Main Application Interface
+![Main App Interface 1](Documentation/Mainapp1.jpeg)
+*Main application window with motivational content*
+
+![Main App Interface 2](Documentation/Mainapp2.jpeg)
+*Category selection and settings interface*
+
+### Widget Gallery
+![Widget Configurations](Documentation/Widgets.jpeg)
+*Available widget size configurations*
+
 ## Features
 
 - 📱 macOS Widget Support (Small, Medium, Large sizes)
@@ -17,6 +37,7 @@ The application is a macOS widget that displays daily motivational images fetche
 - ⚙️ In-app settings to select preferred image categories
 - 📱 Main application now displays a motivational image based on selected categories
 - 🛠️ Debug logging for development
+- The ability to rate images with the thumbs up 👍 or thumbs down 👎 buttons (which will eventually impact the likelihood of you seeing those images again)
 
 ## Requirements
 
@@ -121,3 +142,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [WidgetKit Documentation](https://developer.apple.com/documentation/widgetkit)
 - [Supabase](https://supabase.io/)
 - Christopher Reeve Foundation for inspiration
+
+## Application Screenshots
+

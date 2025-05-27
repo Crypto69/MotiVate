@@ -20,29 +20,42 @@ struct CategorySettingsView: View {
     // MARK: - Body
     
     var body: some View {
-        List {
-            Section {
-                if viewModel.isLoading && viewModel.categories.isEmpty {
-                    loadingView
-                } else if let errorMessage = viewModel.errorMessage {
-                    errorView(message: errorMessage)
-                } else if viewModel.categories.isEmpty {
-                    emptyStateView
-                } else {
-                    categoriesList
+        VStack(alignment: .leading, spacing: 0) {
+            // Custom header above the list for full wrapping
+            Text("Refine your message categories. If none are selected, images will be chosen randomly from all categories.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding([.top, .horizontal])
+
+            List {
+                Section {
+                    if viewModel.isLoading && viewModel.categories.isEmpty {
+                        loadingView
+                    } else if let errorMessage = viewModel.errorMessage {
+                        errorView(message: errorMessage)
+                    } else if viewModel.categories.isEmpty {
+                        emptyStateView
+                    } else {
+                        categoriesList
+                    }
+                } footer: {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "info.circle")
+                            .font(.title3)
+                            .foregroundColor(.accentColor)
+                            .padding(.top, 2)
+                        Text("Right click on your desktop , select 'Edit Widgets', and then add the MotiVate widget to your home screen. The large size works best.")
+                            .font(.callout)
+                            .foregroundColor(.secondary)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.top, 12)
                 }
-            } header: {
-                Text("Select Categories")
-            } footer: {
-                Text("Choose which types of motivational images you'd like to see in your widget. If none are selected, images will be chosen randomly from all categories.")
-                    .font(.callout) // Font size already increased
-                    .foregroundColor(.secondary)
-                    .lineLimit(nil) // Explicitly allow unlimited lines
-                    .fixedSize(horizontal: false, vertical: true) // Ensure text wraps and uses ideal height
-                    // Removed .padding(.horizontal) from here; list section footers usually have some default insets.
             }
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity) // Make the List expand to the full available width
         .navigationTitle("Motivation Categories")
         .onAppear {
             // Only fetch categories if we don't already have them
