@@ -85,11 +85,7 @@ struct SubmitFeedbackIntent: AppIntent {
             throw error
         }
 
-        // After attempting the RPC call (regardless of success or specific failure handling above),
-        // request a reload of the widget's timeline. This allows the widget to refresh its content.
-        // The kind string must match the one defined in your Widget struct.
-        //WidgetCenter.shared.reloadTimelines(ofKind: "ai.myaccessibility.motivate")
-       // Self.logger.info("Requested timeline reload for kind 'ai.myaccessibility.motivate'.")
+        // If the RPC call was successful, we can return a successful result.
         
         // Return a successful result for the intent.
         // If your intent is designed to return data, you would use .result(value: YourData)
