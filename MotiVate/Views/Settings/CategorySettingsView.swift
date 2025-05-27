@@ -14,6 +14,8 @@ struct CategorySettingsView: View {
     
     /// The view model that manages category data and selection state.
     @StateObject private var viewModel = CategorySettingsViewModel()
+    /// Environment object to access the ContentViewModel for triggering image refreshes.
+    @EnvironmentObject var contentViewModel: ContentViewModel
     
     // MARK: - Body
     
@@ -41,7 +43,7 @@ struct CategorySettingsView: View {
             }
         }
         .frame(maxWidth: .infinity) // Make the List expand to the full available width
-        .navigationTitle("Widget Categories")
+        .navigationTitle("Motivation Categories")
         .onAppear {
             // Only fetch categories if we don't already have them
             if viewModel.categories.isEmpty && !viewModel.isLoading {
@@ -131,7 +133,13 @@ struct CategorySettingsView: View {
     private func categoryRow(for category: CategoryItem) -> some View {
         Toggle(isOn: Binding(
             get: { viewModel.isCategorySelected(id: category.id) },
-            set: { _ in viewModel.toggleCategory(id: category.id) }
+            set: { newValue in // Capture the new value, though not strictly needed here as toggleCategory handles the logic
+                viewModel.toggleCategory(id: category.id)
+                // After toggling the category, trigger a refresh of the motivational image
+                Task {
+                    await contentViewModel.fetchMotivationalImage()
+                }
+            }
         )) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(category.name)
@@ -151,7 +159,9 @@ struct CategorySettingsView: View {
 // MARK: - Preview
 
 #Preview {
+    // Updated Preview to provide a mock ContentViewModel
     NavigationView {
         CategorySettingsView()
+            .environmentObject(ContentViewModel()) // Provide a mock for preview
     }
 }

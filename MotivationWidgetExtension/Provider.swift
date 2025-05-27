@@ -60,9 +60,20 @@ struct Provider: TimelineProvider {
     private func fetchMotivationEntry() async -> MotivationEntry {
         Self.logger.info("Fetching motivation entry...")
         var downloadedImageData: Data? = nil
+
+        // Suppress App Group UserDefaults warning in SwiftUI preview or test context
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            Self.logger.warning("Running in SwiftUI preview context. Skipping App Group UserDefaults access.");
+            return MotivationEntry.staticWidgetPreview
+        }
+        #endif
         
         let appGroupID = "group.ai.myaccessibility.motivate"
         let userDefaults = UserDefaults(suiteName: appGroupID)
+        if userDefaults == nil {
+            Self.logger.warning("App Group UserDefaults is nil. This may be a preview, test, or misconfigured context.")
+        }
         
         let selectedCategoryIDsStrings = userDefaults?.stringArray(forKey: "selectedCategoryIDs") ?? []
         let categoryIDsForRPC: [Int64]? = selectedCategoryIDsStrings.isEmpty ? nil : selectedCategoryIDsStrings.compactMap { Int64($0) }
