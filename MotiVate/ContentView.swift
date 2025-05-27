@@ -8,7 +8,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
-    @State private var showingAbout = false // Controls About sheet
+    @EnvironmentObject var appMenuState: AppMenuState
 
     var body: some View {
         NavigationSplitView {
@@ -28,7 +28,7 @@ struct ContentView: View {
                             Text("MotiVate")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            Text("Daily reminders of strength, hope, and purpose—one message at a time.")
+                            Text("Daily reminders of strength, hope, and purpose—one image at a time.")
                                 .font(.subheadline)
                                 .italic()
                                 .foregroundColor(.secondary)
@@ -38,15 +38,17 @@ struct ContentView: View {
 
                     Spacer()
 
-                    // About button on the right
-                    Button {
-                        showingAbout = true
-                    } label: {
-                        Label("About", systemImage: "info.circle")
-                            .labelStyle(.titleAndIcon)
+                    // About button and version on the right
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Button {
+                            appMenuState.showAbout = true
+                        } label: {
+                            Label("About", systemImage: "info.circle")
+                                .labelStyle(.titleAndIcon)
+                        }
+                        .buttonStyle(.bordered)
+                        .padding(.top, 8)
                     }
-                    .buttonStyle(.bordered)
-                    .padding(.top, 8)
                 }
                 .padding(.horizontal)
 
@@ -95,7 +97,7 @@ struct ContentView: View {
                 .frame(minWidth: 500, idealWidth: 550)
                 .navigationTitle("Settings")
         }
-        .sheet(isPresented: $showingAbout) {
+        .sheet(isPresented: $appMenuState.showAbout) {
             AboutView()
         }
         .environmentObject(viewModel)

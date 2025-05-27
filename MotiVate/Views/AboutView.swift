@@ -11,10 +11,21 @@ struct AboutView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("About MotiVate")
-                .font(.title)
-                .bold()
-                .padding(.bottom, 4)
+            // Top row: About MotiVate (left), version (right)
+            HStack(alignment: .firstTextBaseline) {
+                Text("About MotiVate")
+                    .font(.title)
+                    .bold()
+                Spacer()
+                if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+                   let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                    Text("v\(version) (\(build))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.trailing, 2)
+                }
+            }
+            .padding(.bottom, 4)
 
             ScrollView {
                 Text("""
