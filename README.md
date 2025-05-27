@@ -81,32 +81,82 @@ Each size displays motivational images while maintaining aspect ratio and proper
 
 ### Project Structure
 
-- `MotiVate/`: Main app target
+- `MotiVate/` (Main app target)
+  - `Assets.xcassets/`: Application icons, logo, and accent colors.
   - `core/`: Core functionality and shared models
-    - `SupabaseClient.swift`: Handles all Supabase interactions (RPC calls, table queries).
-    - `SharedModels.swift`: Defines shared data structures like `CategoryItem` and `ImageResponse`.
-  - `ViewModels/`: Contains ObservableObject classes for views.
+    - `SupabaseClient.swift`: Handles all Supabase interactions (RPC calls, table queries, image feedback).
+    - `SharedModels.swift`: Defines shared data structures like `CategoryItem`, `ImageResponse`, and potentially feedback models.
+  - `Models/`:
+    - `CategoryItem.swift`: (Deprecated, functionality moved to `core/SharedModels.swift`).
+  - `ViewModels/`: Contains `ObservableObject` classes for views
     - `CategorySettingsViewModel.swift`: Manages logic for the category selection screen.
-    - `ContentViewModel.swift`: Manages logic for the main app's image display.
-  - `Views/`: Contains SwiftUI views for the main application.
-    - `ContentView.swift`: The main view of the application, displays an image and provides navigation.
+    - `ContentViewModel.swift`: Manages logic for the main app's image display and image feedback.
+  - `Views/`: Contains SwiftUI views for the main application
+    - `ContentView.swift`: The main view of the application, displays an image, provides navigation, and allows image feedback.
+    - `AboutView.swift`: Displays application version, author information, and project links (GitHub & Instagram).
     - `Settings/CategorySettingsView.swift`: UI for users to select preferred image categories.
-  - `Models/`: May contain older or app-specific models (e.g., `CategoryItem.swift` is now a re-exporter or can be removed).
-- `MotivationWidgetExtension/`: Widget extension
+  - `MotiVateApp.swift`: The main entry point for the application.
+  - `MotiVate.entitlements`: App entitlements.
+- `MotivationWidgetExtension/` (Widget extension)
+  - `Assets.xcassets/`: Widget-specific assets, including preview images and icons.
   - `Provider.swift`: Widget data provider, fetches images based on selected categories.
   - `MotivationEntry.swift`: Timeline entry model for the widget.
   - `MotivationWidgetExtension.swift`: Widget view and configuration.
+  - `MotivationWidgetExtensionBundle.swift`: Defines the widget bundle.
+  - `SubmitFeedbackIntent.swift`: Handles AppIntents for submitting image feedback (e.g., thumbs up/down) directly from the widget.
+  - `Info.plist`: Widget extension configuration.
+  - `MotivationWidgetExtension.entitlements`: Widget entitlements.
+
+### Project Overview Diagram
+
+```mermaid
+graph TD
+    A[MotiVate Project] --> B(MotiVate App);
+    A --> C(MotivationWidgetExtension);
+    A --> D(Supabase Backend);
+    A --> E(Documentation);
+    A --> F(Project Files .gitignore, etc.);
+
+    B --> B1(MotiVateApp.swift);
+    B --> B2(ContentView.swift);
+    B --> B3(Assets.xcassets);
+    B --> B4(core);
+        B4 --> B4a(SupabaseClient.swift);
+        B4 --> B4b(SharedModels.swift);
+    B --> B5(Models);
+        B5 --> B5a(CategoryItem.swift - deprecated);
+    B --> B6(ViewModels);
+        B6 --> B6a(ContentViewModel.swift);
+        B6 --> B6b(CategorySettingsViewModel.swift);
+    B --> B7(Views);
+        B7 --> B7a(AboutView.swift);
+        B7 --> B7b(Settings/CategorySettingsView.swift);
+
+    C --> C1(MotivationWidgetExtension.swift);
+    C --> C2(Provider.swift);
+    C --> C3(MotivationEntry.swift);
+    C --> C4(SubmitFeedbackIntent.swift);
+    C --> C5(Assets.xcassets);
+    C --> C6(MotivationWidgetExtensionBundle.swift);
+
+    D -- Fetches/Stores Data --> B4a;
+    D -- Fetches Data --> C2;
+```
 
 ### Key Components
 
-- **Provider** (`MotivationWidgetExtension/Provider.swift`): Manages widget lifecycle, reads selected categories from `UserDefaults`, and fetches images via RPC.
-- **MotivationEntry** (`MotivationWidgetExtension/MotivationEntry.swift`): Data model for widget content.
-- **MotivationWidgetEntryView** (within `MotivationWidgetExtension.swift`): SwiftUI view for widget rendering.
-- **SupabaseClient** (`MotiVate/core/SupabaseClient.swift`): Centralizes all communication with Supabase, including fetching category lists and image URLs.
-- **CategorySettingsView** (`MotiVate/Views/Settings/CategorySettingsView.swift`): Allows users to select their preferred image categories.
-- **CategorySettingsViewModel** (`MotiVate/ViewModels/CategorySettingsViewModel.swift`): Handles the logic for fetching categories, managing user selections, and saving them to `UserDefaults`.
-- **ContentViewModel** (`MotiVate/ViewModels/ContentViewModel.swift`): Manages fetching and displaying a motivational image in the main app view, respecting selected categories.
-- **SharedModels** (`MotiVate/core/SharedModels.swift`): Contains common data structures like `CategoryItem` and `ImageResponse` used by both the app and potentially the widget.
+- **Provider** ([`MotivationWidgetExtension/Provider.swift`](MotivationWidgetExtension/Provider.swift:0)): Manages widget lifecycle, reads selected categories from `UserDefaults`, and fetches images via RPC.
+- **MotivationEntry** ([`MotivationWidgetExtension/MotivationEntry.swift`](MotivationWidgetExtension/MotivationEntry.swift:0)): Data model for widget content.
+- **MotivationWidgetEntryView** (within [`MotivationWidgetExtension.swift`](MotivationWidgetExtension/MotivationWidgetExtension.swift:0)): SwiftUI view for widget rendering.
+- **SubmitFeedbackIntent** ([`MotivationWidgetExtension/SubmitFeedbackIntent.swift`](MotivationWidgetExtension/SubmitFeedbackIntent.swift:0)): Enables users to provide feedback (e.g., like/dislike) on the displayed motivational image directly from the widget interface using AppIntents.
+- **SupabaseClient** ([`MotiVate/core/SupabaseClient.swift`](MotiVate/core/SupabaseClient.swift:0)): Centralizes all communication with Supabase, including fetching category lists, image URLs, and submitting image feedback.
+- **CategorySettingsView** ([`MotiVate/Views/Settings/CategorySettingsView.swift`](MotiVate/Views/Settings/CategorySettingsView.swift:0)): Allows users to select their preferred image categories.
+- **CategorySettingsViewModel** ([`MotiVate/ViewModels/CategorySettingsViewModel.swift`](MotiVate/ViewModels/CategorySettingsViewModel.swift:0)): Handles the logic for fetching categories, managing user selections, and saving them to `UserDefaults`.
+- **ContentViewModel** ([`MotiVate/ViewModels/ContentViewModel.swift`](MotiVate/ViewModels/ContentViewModel.swift:0)): Manages fetching and displaying a motivational image in the main app view, respecting selected categories, and handling image feedback.
+- **ContentView** ([`MotiVate/ContentView.swift`](MotiVate/ContentView.swift:0)): The primary interface of the main application. Displays the motivational image, provides navigation to settings and the about screen, and includes controls for image feedback.
+- **AboutView** ([`MotiVate/Views/AboutView.swift`](MotiVate/Views/AboutView.swift:0)): Provides users with information about the application, including its version, author details, and project links.
+- **SharedModels** ([`MotiVate/core/SharedModels.swift`](MotiVate/core/SharedModels.swift:0)): Contains common data structures like `CategoryItem` (for category data) and `ImageResponse` (for image data from Supabase), used across both the main app and the widget.
+- **`MotiVate/Models/CategoryItem.swift`**: (Deprecated, functionality now part of [`MotiVate/core/SharedModels.swift`](MotiVate/core/SharedModels.swift:0)).
 
 ### Debug Logging
 
