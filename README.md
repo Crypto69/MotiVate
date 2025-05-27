@@ -8,6 +8,8 @@ The application is a macOS widget that displays daily motivational images fetche
 
 Here are some screenshots of MotiVate in action:
 
+## Application Screenshots
+
 ### Desktop Widget Views
 ![Desktop Widget View 3](Documentation/Desktop3.jpeg)
 *Desktop widget showing a motivational quote*
@@ -193,5 +195,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Supabase](https://supabase.io/)
 - Christopher Reeve Foundation for inspiration
 
-## Application Screenshots
+
 
