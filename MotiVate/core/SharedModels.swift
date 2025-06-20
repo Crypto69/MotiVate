@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 /// Represents a category from the Supabase 'categories' table.
 /// Maps to the following schema:
@@ -101,5 +102,151 @@ public struct ImageResponse: Decodable, Identifiable {
         case image_url // Matches JSON
         case likes_count // Matches JSON
         case dislikes_count // Matches JSON
+    }
+}
+
+// MARK: - Offline Image Manager
+
+/// Manages offline fallback images bundled with the application
+public class OfflineImageManager {
+    public static let shared = OfflineImageManager()
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "MotiVate", category: "OfflineImageManager")
+    
+    private let offlineImageNames: [String]
+    
+    private init() {
+        // Get the main bundle (works for both app and widget extension)
+        let bundle = Bundle.main
+        
+        // Find all image files in the OfflineImages directory
+        var imageNames: [String] = []
+        
+        let supportedExtensions = ["jpg", "jpeg", "png"]
+        
+        // Method 1: Try with directory specification
+        for ext in supportedExtensions {
+            let paths = bundle.paths(forResourcesOfType: ext, inDirectory: "OfflineImages")
+            let names = paths.compactMap { path in
+                let filename = (path as NSString).lastPathComponent
+                return filename
+            }
+            imageNames.append(contentsOf: names)
+        }
+        
+        // Method 2: If no images found, try without directory (flat search)
+        if imageNames.isEmpty {
+            Self.logger.warning("No images found in OfflineImages directory, trying flat bundle search...")
+            for ext in supportedExtensions {
+                let paths = bundle.paths(forResourcesOfType: ext, inDirectory: nil)
+                let names = paths.compactMap { path in
+                    let filename = (path as NSString).lastPathComponent
+                    // Only include files that contain "offline" or are from known motivational image patterns
+                    if filename.lowercased().contains("offline") || 
+                       filename.hasPrefix("0-") || 
+                       filename.contains("motivat") ||
+                       filename.contains("courage") ||
+                       filename.contains("strength") ||
+                       filename.contains("pain") {
+                        return filename
+                    }
+                    return nil
+                }
+                imageNames.append(contentsOf: names)
+            }
+        }
+        
+        // Method 3: If still no images, try to find specific known files
+        if imageNames.isEmpty {
+            Self.logger.warning("Still no images found, checking for specific files...")
+            let testFiles = [
+                "0-009_My_disability_is_that_I_cannot_use_m.jpeg",
+                "0-012_Get_busy_living_or_get_busy_dying_.jpeg",
+                "0-015_It_is_a_waste_of_time_to_be_angry_ab.jpeg"
+            ]
+            
+            for testFile in testFiles {
+                if let _ = bundle.path(forResource: (testFile as NSString).deletingPathExtension, 
+                                     ofType: (testFile as NSString).pathExtension, 
+                                     inDirectory: "OfflineImages") {
+                    imageNames.append(testFile)
+                    Self.logger.info("Found test file: \(testFile)")
+                } else if let _ = bundle.path(forResource: (testFile as NSString).deletingPathExtension, 
+                                            ofType: (testFile as NSString).pathExtension) {
+                    imageNames.append(testFile)
+                    Self.logger.info("Found test file in root bundle: \(testFile)")
+                }
+            }
+        }
+        
+        self.offlineImageNames = imageNames
+        Self.logger.info("OfflineImageManager initialized with \(imageNames.count) offline images from shared bundle")
+        
+        if imageNames.isEmpty {
+            Self.logger.error("CRITICAL: No offline images found in bundle after trying multiple methods!")
+            Self.logger.error("Bundle path: \(bundle.bundlePath)")
+            
+            // Debug: List all bundle resources by trying each extension
+            var allImageFiles: [String] = []
+            for ext in supportedExtensions {
+                let paths = bundle.paths(forResourcesOfType: ext, inDirectory: nil)
+                allImageFiles.append(contentsOf: paths.map { ($0 as NSString).lastPathComponent })
+            }
+            
+            if !allImageFiles.isEmpty {
+                Self.logger.debug("All image files in bundle: \(allImageFiles.joined(separator: ", "))")
+            } else {
+                Self.logger.error("No image files found in bundle at all!")
+            }
+        } else {
+            Self.logger.debug("Found offline images: \(imageNames.joined(separator: ", "))")
+        }
+    }
+    
+    /// Returns a random offline image data, or nil if no offline images are available
+    public func getRandomOfflineImageData() -> Data? {
+        guard !offlineImageNames.isEmpty else {
+            Self.logger.error("No offline images available")
+            return nil
+        }
+        
+        guard let randomImageName = offlineImageNames.randomElement() else {
+            Self.logger.error("Failed to select random offline image")
+            return nil
+        }
+        
+        // Remove extension to get the resource name
+        let nameWithoutExtension = (randomImageName as NSString).deletingPathExtension
+        let pathExtension = (randomImageName as NSString).pathExtension
+        
+        // Try multiple methods to find the image
+        var imagePath: String?
+        
+        // Method 1: Try with OfflineImages directory
+        imagePath = Bundle.main.path(forResource: nameWithoutExtension, ofType: pathExtension, inDirectory: "OfflineImages")
+        
+        // Method 2: If not found, try without directory
+        if imagePath == nil {
+            imagePath = Bundle.main.path(forResource: nameWithoutExtension, ofType: pathExtension)
+            Self.logger.debug("Found image in root bundle: \(randomImageName)")
+        }
+        
+        guard let finalImagePath = imagePath,
+              let imageData = FileManager.default.contents(atPath: finalImagePath) else {
+            Self.logger.error("Failed to load offline image: \(randomImageName) from any location")
+            return nil
+        }
+        
+        Self.logger.info("Loaded offline image: \(randomImageName), size: \(imageData.count) bytes")
+        return imageData
+    }
+    
+    /// Returns all available offline image names
+    public var availableOfflineImages: [String] {
+        return offlineImageNames
+    }
+    
+    /// Checks if any offline images are available
+    public var hasOfflineImages: Bool {
+        return !offlineImageNames.isEmpty
     }
 }

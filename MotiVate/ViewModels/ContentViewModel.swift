@@ -15,6 +15,7 @@ class ContentViewModel: ObservableObject {
     @Published var motivationalImage: Image?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    @Published var isFromOffline: Bool = false
 
     private let appGroupID = "group.ai.myaccessibility.motivate"
     private let userDefaultsKey = "selectedCategoryIDs"
@@ -29,61 +30,57 @@ class ContentViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         motivationalImage = nil // Clear previous image
+        isFromOffline = false
 
-        do {
-            // 1. Get selected category IDs from UserDefaults
-            let userDefaults = UserDefaults(suiteName: appGroupID)
-            let selectedCategoryIDsStrings = userDefaults?.stringArray(forKey: userDefaultsKey) ?? []
-            let categoryIDsForRPC: [Int64]? = selectedCategoryIDsStrings.isEmpty ? nil : selectedCategoryIDsStrings.compactMap { Int64($0) }
-            
-            print("ContentViewModel: Fetching image with category IDs: \(categoryIDsForRPC?.map(String.init).joined(separator: ", ") ?? "None (fully random)")")
+        // 1. Get selected category IDs from UserDefaults
+        let userDefaults = UserDefaults(suiteName: appGroupID)
+        let selectedCategoryIDsStrings = userDefaults?.stringArray(forKey: userDefaultsKey) ?? []
+        let categoryIDsForRPC: [Int64]? = selectedCategoryIDsStrings.isEmpty ? nil : selectedCategoryIDsStrings.compactMap { Int64($0) }
+        
+        print("ContentViewModel: Fetching image with category IDs: \(categoryIDsForRPC?.map(String.init).joined(separator: ", ") ?? "None (fully random)")")
 
-            // 2. Call RPC to get image metadata
-            let imageResponse: ImageResponse = try await SupabaseClient.shared.client // Use shared ImageResponse
-                .rpc("get_random_image", params: ["category_ids": categoryIDsForRPC])
-                .single()
-                .execute()
-                .value
-
-            print("ContentViewModel: RPC Response - ID: \(imageResponse.id), Filename: \(imageResponse.image_url)")
-
-            // 3. Construct full image URL
-            guard let imageURL = SupabaseClient.shared.publicImageURL(filename: imageResponse.image_url) else {
-                throw MotivDBError.urlConversionFailed // Or a more specific error
-            }
-            print("ContentViewModel: Constructed image URL: \(imageURL.absoluteString)")
-
-            // 4. Download image data
-            let (data, urlResponse) = try await URLSession.shared.data(from: imageURL)
-            
-            guard let httpResponse = urlResponse as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                let statusCode = (urlResponse as? HTTPURLResponse)?.statusCode ?? -1
-                print("ContentViewModel: Image download failed. Status code: \(statusCode)")
-                throw NSError(domain: "ImageDownloadError", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to download image. Status: \(statusCode)"])
-            }
-            
-            print("ContentViewModel: Downloaded \(data.count) bytes.")
-
-            // 5. Convert data to NSImage (for macOS) then to SwiftUI Image
+        // 2. Use the new getImageWithFallback method from SupabaseClient
+        let (imageData, fromOffline, imageId) = await SupabaseClient.shared.getImageWithFallback(categoryIds: categoryIDsForRPC)
+        
+        if let imageData = imageData {
+            // 3. Convert data to appropriate Image type
             #if os(macOS)
-            if let nsImage = NSImage(data: data) {
+            if let nsImage = NSImage(data: imageData) {
                 self.motivationalImage = Image(nsImage: nsImage)
+                self.isFromOffline = fromOffline
+                self.isLoading = false
+                
+                if fromOffline {
+                    print("ContentViewModel: Successfully loaded offline image, size: \(imageData.count) bytes")
+                } else {
+                    print("ContentViewModel: Successfully loaded online image, ID: \(imageId ?? -1), size: \(imageData.count) bytes")
+                }
             } else {
-                throw NSError(domain: "ImageConversionError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert downloaded data to NSImage."])
+                self.errorMessage = "Failed to convert image data"
+                self.isLoading = false
+                print("ContentViewModel: Failed to convert image data to NSImage")
             }
             #elseif os(iOS) || os(watchOS) || os(tvOS)
-            if let uiImage = UIImage(data: data) {
+            if let uiImage = UIImage(data: imageData) {
                 self.motivationalImage = Image(uiImage: uiImage)
+                self.isFromOffline = fromOffline
+                self.isLoading = false
+                
+                if fromOffline {
+                    print("ContentViewModel: Successfully loaded offline image, size: \(imageData.count) bytes")
+                } else {
+                    print("ContentViewModel: Successfully loaded online image, ID: \(imageId ?? -1), size: \(imageData.count) bytes")
+                }
             } else {
-                throw NSError(domain: "ImageConversionError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert downloaded data to UIImage."])
+                self.errorMessage = "Failed to convert image data"
+                self.isLoading = false
+                print("ContentViewModel: Failed to convert image data to UIImage")
             }
             #endif
-            
+        } else {
+            self.errorMessage = fromOffline ? "No offline images available" : "Network error and no offline fallback"
             self.isLoading = false
-        } catch {
-            print("ContentViewModel: Error fetching motivational image - \(error.localizedDescription)")
-            self.errorMessage = error.localizedDescription
-            self.isLoading = false
+            print("ContentViewModel: Failed to load any image (both online and offline failed)")
         }
     }
 }

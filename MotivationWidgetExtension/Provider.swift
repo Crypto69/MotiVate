@@ -44,7 +44,6 @@ struct Provider: TimelineProvider {
 
     // Provides an array of timeline entries.
     func getTimeline(in context: Context, completion: @escaping (Timeline<MotivationEntry>) -> Void) {
-        //Self.logger.info("Timeline requested. Family: \(context.family.description), isPreview: \(context.isPreview). Will call fetchMotivationEntry.")
         Task {
             let currentEntry = await fetchMotivationEntry()
             // For this widget, we'll refresh according to the policy.
@@ -58,8 +57,7 @@ struct Provider: TimelineProvider {
     }
 
     private func fetchMotivationEntry() async -> MotivationEntry {
-        Self.logger.info("Fetching motivation entry...")
-        var downloadedImageData: Data? = nil
+        Self.logger.info("Fetching motivation entry with offline fallback...")
 
         // Suppress App Group UserDefaults warning in SwiftUI preview or test context
         #if DEBUG
@@ -78,52 +76,35 @@ struct Provider: TimelineProvider {
         let selectedCategoryIDsStrings = userDefaults?.stringArray(forKey: "selectedCategoryIDs") ?? []
         let categoryIDsForRPC: [Int64]? = selectedCategoryIDsStrings.isEmpty ? nil : selectedCategoryIDsStrings.compactMap { Int64($0) }
 
-        //Self.logger.debug("Selected category IDs for RPC: \(categoryIDsForRPC?.map { String($0) }.joined(separator: ", ") ?? "None (fully random)")")
+        Self.logger.debug("Selected category IDs for RPC: \(categoryIDsForRPC?.map { String($0) }.joined(separator: ", ") ?? "None (fully random)")")
 
-        do {
-            // Call the RPC function "get_random_image"
-            // Assuming SupabaseClient.shared.client is the Supabase.SupabaseClient instance
-            // The type ImageResponse should now resolve from the shared MotiVate/core/SharedModels.swift
-            let imageResponse: ImageResponse = try await SupabaseClient.shared.client
-                .rpc("get_random_image", params: ["category_ids": categoryIDsForRPC])
-                .single() // Expecting a single row from the function
-                .execute()
-                .value
-            
-            Self.logger.info("RPC get_random_image response: ID \(imageResponse.id), Filename \(imageResponse.image_url)")
-
-            guard let imageURL = SupabaseClient.shared.publicImageURL(filename: imageResponse.image_url) else {
-                Self.logger.error("Failed to construct full URL for filename: \(imageResponse.image_url) using SupabaseClient helper")
-                throw MotivDBError.urlConversionFailed
+        // Use the new getImageWithFallback method from SupabaseClient
+        let (imageData, isFromOffline, imageId) = await SupabaseClient.shared.getImageWithFallback(categoryIds: categoryIDsForRPC)
+        
+        if let imageData = imageData {
+            if isFromOffline {
+                Self.logger.info("Successfully loaded offline image, size: \(imageData.count) bytes")
+                return MotivationEntry(
+                    date: Date(),
+                    imageId: imageId,
+                    imageURL: nil, // No URL for offline images
+                    imageData: imageData,
+                    isFromOffline: true
+                )
+            } else {
+                Self.logger.info("Successfully loaded online image, ID: \(imageId ?? -1), size: \(imageData.count) bytes")
+                return MotivationEntry(
+                    date: Date(),
+                    imageId: imageId,
+                    imageURL: nil, // We have the data already
+                    imageData: imageData,
+                    isFromOffline: false
+                )
             }
-            
-            //Self.logger.debug("Constructed full URL via SupabaseClient helper: \(imageURL.absoluteString)")
-
-            // --- Manual Download ---
-            do {
-                let (data, response) = try await URLSession.shared.data(from: imageURL)
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                    Self.logger.debug("Downloaded \(data.count) bytes.")
-                    downloadedImageData = data
-                } else if let httpResponse = response as? HTTPURLResponse {
-                    Self.logger.warning("Download FAILED. Status: \(httpResponse.statusCode)")
-                } else {
-                    Self.logger.warning("Download FAILED. No HTTP response.")
-                }
-            } catch {
-                Self.logger.error("Download FAILED. Error: \(error.localizedDescription)")
-                // Keep downloadedImageData as nil
-            }
-            // Pass the imageResponse.id to the MotivationEntry
-            return MotivationEntry(date: Date(), imageId: imageResponse.id, imageURL: imageURL, imageData: downloadedImageData)
-        } catch let error as MotivDBError {
-            Self.logger.error("MotivDBError: \(error.localizedDescription)")
-            // Pass nil for imageId in error cases
-            return MotivationEntry(date: Date(), imageId: nil, errorMessage: "DB Error")
-        } catch {
-            Self.logger.error("RPC or other error in fetchMotivationEntry: \(error.localizedDescription)")
-            // Pass nil for imageId in error cases
-            return MotivationEntry(date: Date(), imageId: nil, errorMessage: "Fetch Error")
+        } else {
+            Self.logger.error("Failed to load any image (both online and offline failed)")
+            let errorMessage = isFromOffline ? "No offline images available" : "Network error and no offline fallback"
+            return MotivationEntry(date: Date(), imageId: nil, errorMessage: errorMessage)
         }
     }
 } // Closing brace for struct Provider

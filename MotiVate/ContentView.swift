@@ -68,11 +68,35 @@ struct ContentView: View {
                         .buttonStyle(.borderedProminent)
                     }
                 } else if let image = viewModel.motivationalImage {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 512, height: 512)
-                        .padding()
+                    VStack(spacing: 12) {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 512, height: 512)
+                        
+                        // Online/Offline indicator
+                        HStack(spacing: 8) {
+                            Image(systemName: viewModel.isFromOffline ? "wifi.slash" : "wifi")
+                                .foregroundColor(viewModel.isFromOffline ? .red : .green)
+                                .font(.system(size: 14, weight: .medium))
+                            
+                            Text(viewModel.isFromOffline ? "Offline Mode" : "Online")
+                                .font(.caption)
+                                .foregroundColor(viewModel.isFromOffline ? .red : .green)
+                                .fontWeight(.medium)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(viewModel.isFromOffline ? .red.opacity(0.1) : .green.opacity(0.1))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(viewModel.isFromOffline ? .red.opacity(0.3) : .green.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                    .padding()
                 } else {
                     Text("Tap refresh to get a motivational image.")
                         .foregroundColor(.secondary)

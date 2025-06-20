@@ -6,6 +6,8 @@
 
 import Supabase
 import Foundation
+import Network
+import os
 
 // Custom error for clarity when fetching data
 enum MotivDBError: Error {
@@ -13,10 +15,12 @@ enum MotivDBError: Error {
     case imageFetchFailed  // Could not fetch image URL
     case urlConversionFailed // Could not convert string to URL
     case categoriesFetchFailed // Could not fetch categories
+    case networkUnavailable // No internet connection
 }
 
 struct SupabaseClient {
     static let shared = SupabaseClient() // Singleton instance
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "MotiVate", category: "SupabaseClient")
 
     // Public constants for storage configuration
     public static let imageBucketName = "motivational-images"
@@ -30,6 +34,8 @@ struct SupabaseClient {
     // For now, assuming direct access is intended as per Provider.swift usage.
     let client: Supabase.SupabaseClient // Changed from private to internal (default) or public if needed
     let baseURL: URL // Store the base URL for internal use
+    private let networkMonitor: NWPathMonitor
+    private let monitorQueue = DispatchQueue(label: "NetworkMonitor")
 
     private init() { // Private initializer for singleton
         // --- ⚠️ IMPORTANT: REPLACE WITH YOUR ACTUAL SUPABASE DETAILS ---
@@ -46,6 +52,17 @@ struct SupabaseClient {
             supabaseURL: self.baseURL, // Use the stored baseURL
             supabaseKey: supabaseAnonKeyString
         )
+        
+        // Initialize network monitor
+        self.networkMonitor = NWPathMonitor()
+        self.networkMonitor.start(queue: monitorQueue)
+        
+        Self.logger.info("SupabaseClient initialized with network monitoring")
+    }
+    
+    /// Checks if network is available
+    public var isNetworkAvailable: Bool {
+        return networkMonitor.currentPath.status == .satisfied
     }
 
     /// Fetches a list of all files in the "motivational-images" bucket,
@@ -122,6 +139,47 @@ struct SupabaseClient {
         } catch {
             print("SupabaseClient: fetchAllCategories - Error fetching categories: \(error.localizedDescription)")
             throw MotivDBError.categoriesFetchFailed
+        }
+    }
+    
+    /// Attempts to fetch image with offline fallback
+    /// Returns a tuple of (imageData, isFromOffline, imageId)
+    public func getImageWithFallback(categoryIds: [Int64]? = nil) async -> (Data?, Bool, Int64?) {
+        // Always try network first - this is more reliable than checking network status
+        // The network monitor can be slow to initialize and may report incorrect status
+        Self.logger.info("Attempting to fetch image from network...")
+        
+        do {
+            let imageResponse: ImageResponse = try await client
+                .rpc("get_random_image", params: ["category_ids": categoryIds])
+                .single()
+                .execute()
+                .value
+            
+            Self.logger.info("Network fetch successful: ID \(imageResponse.id), Filename \(imageResponse.image_url)")
+            
+            guard let imageURL = publicImageURL(filename: imageResponse.image_url) else {
+                Self.logger.error("Failed to construct URL for filename: \(imageResponse.image_url)")
+                throw MotivDBError.urlConversionFailed
+            }
+            
+            // Download the image data
+            let (data, response) = try await URLSession.shared.data(from: imageURL)
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                Self.logger.debug("Downloaded \(data.count) bytes from network")
+                return (data, false, imageResponse.id)
+            } else {
+                throw MotivDBError.imageFetchFailed
+            }
+        } catch {
+            Self.logger.warning("Network fetch failed: \(error.localizedDescription), falling back to offline")
+            // Network request failed, use offline fallback
+            if let offlineData = OfflineImageManager.shared.getRandomOfflineImageData() {
+                return (offlineData, true, nil)
+            } else {
+                Self.logger.error("Network failed and no offline images available")
+                return (nil, true, nil)
+            }
         }
     }
 }

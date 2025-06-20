@@ -16,15 +16,17 @@ struct MotivationEntry: TimelineEntry {
     let imageData: Data? // Holds the manually downloaded image data
     let errorMessage: String? // Optional error message for debugging or display
     let staticPreviewImageName: String? // NEW: For static preview from Assets
+    let isFromOffline: Bool // NEW: Indicates if image came from offline bundle
 
     // Convenience initializer for success cases (dynamic image)
-    init(date: Date, imageId: Int64?, imageURL: URL?, imageData: Data? = nil, errorMessage: String? = nil) { // Added imageId
+    init(date: Date, imageId: Int64?, imageURL: URL?, imageData: Data? = nil, errorMessage: String? = nil, isFromOffline: Bool = false) { // Added imageId and isFromOffline
         self.date = date
         self.imageId = imageId // Store imageId
         self.imageURL = imageURL
         self.imageData = imageData
         self.errorMessage = errorMessage
         self.staticPreviewImageName = nil // Ensure nil for dynamic images
+        self.isFromOffline = isFromOffline
     }
 
     // Convenience initializer for error cases
@@ -35,6 +37,7 @@ struct MotivationEntry: TimelineEntry {
         self.imageData = nil
         self.errorMessage = errorMessage
         self.staticPreviewImageName = nil // Ensure nil for error messages
+        self.isFromOffline = false
     }
 
     // NEW: Convenience initializer for static preview image
@@ -45,6 +48,7 @@ struct MotivationEntry: TimelineEntry {
         self.imageData = nil
         self.errorMessage = nil
         self.staticPreviewImageName = staticPreviewImageName
+        self.isFromOffline = false
     }
 
     // Static placeholder for gallery (initial loading state)
