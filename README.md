@@ -8,9 +8,17 @@ This app was born from that journey. It’s a simple idea—delivering motivatio
 
 I’m not here to tell you I have it all figured out. I still struggle. I still live with pain. But I’ve learned that you can survive almost anything if you break it down into small, bearable pieces. This app is my way of sharing that lesson with anyone who needs to hear it.
 
-I built this entire application without the use of my hands—using a head-tracking Bluetooth mouse, voice commands, and assistive tech that helps me code, create, and connect. If you're curious how that works or just want to follow along with the journey, check out my Instagram at the link below.
+I built this entire application without the use of my hands—using a head-tracking Bluetooth mouse, voice commands, and assistive tech that helps me code, create, and connect. If you're curious how that works or just want to follow along with the journey, check out my social media channels below for more information:
 
-If one message, one quote, one image helps you get through a hard day—then it’s all been worth it.
+## Follow My Journey
+
+- **Instagram**: [@myaccessibility](https://www.instagram.com/myaccessibility/) - See my assistive technology setup and daily updates
+- **YouTube**: [@myaccessibility](https://www.youtube.com/@myaccessibility) - Watch tutorials and learn about accessible coding
+- **Website**: [myaccessibility.ai](https://myaccessibility.ai/) - Comprehensive resources and blog
+- **LinkedIn**: [Chris Venter](https://www.linkedin.com/in/chris-venter/) - Professional updates and networking
+- **GitHub**: [Open Source Projects](https://github.com/Crypto69/MotiVate) - Contribute to this and other projects
+
+If one message, one quote, one image helps you get through a hard day—then it's all been worth it.
 
 — Chris Venter
 
