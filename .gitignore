@@ -91,3 +91,12 @@ iOSInjectionProject/
 
 # macOS
 .DS_Store
+
+# Sensitive project files
+CLAUDE.md
+OFFLINE_SETUP_GUIDE.md
+*.xcconfig
+build_and_distribute*.sh
+build_log_*.log
+backup_*/
+distribution/

@@ -78,6 +78,18 @@ If one message, one quote, one image helps you get through a hard dayâ€”then itâ
                 }
                 .padding(.vertical, 2)
 
+                Link(destination: URL(string: "https://www.youtube.com/@myaccessibility")!) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "play.rectangle.fill")
+                            .font(.title2)
+                            .foregroundColor(.red)
+                        Text("YouTube: @myaccessibility")
+                            .font(.body)
+                            .foregroundColor(.accentColor)
+                    }
+                }
+                .padding(.vertical, 2)
+
                 Link(destination: URL(string: "https://www.linkedin.com/in/chris-venter/")!) {
                     HStack(spacing: 8) {
                         Image(systemName: "link") // LinkedIn SF Symbol fallback
@@ -89,6 +101,23 @@ If one message, one quote, one image helps you get through a hard dayâ€”then itâ
                     }
                 }
                 .padding(.vertical, 2)
+
+                Link(destination: URL(string: "https://myaccessibility.ai/")!) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "globe")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                        Text("myaccessibility.ai")
+                            .font(.body)
+                            .foregroundColor(.accentColor)
+                    }
+                }
+                .padding(.vertical, 2)
+
+                Text("See my assistive technology setup, watch tutorials, and learn more about accessible coding")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.top, 4)
             }
 
             Spacer()
