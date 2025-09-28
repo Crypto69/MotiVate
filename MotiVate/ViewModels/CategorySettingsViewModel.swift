@@ -29,7 +29,7 @@ class CategorySettingsViewModel: ObservableObject {
     // MARK: - Constants
     
     /// The App Group ID used for sharing UserDefaults between the main app and widget.
-    private let appGroupID = "group.ai.myaccessibility.motivate"
+    private let appGroupID = "group.myaccessibility.ai.motivate"
     
     /// The UserDefaults key for storing selected category IDs.
     private let userDefaultsKey = "selectedCategoryIDs"

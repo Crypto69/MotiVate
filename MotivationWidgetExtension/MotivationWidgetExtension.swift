@@ -92,7 +92,6 @@ struct MotivationWidgetEntryView : View {
                 .padding(10) // Padding from the ZStack edges
             }
         }
-        .widgetURL(URL(string: "motivationalwidget://open")) // This makes the whole widget tappable to open the app
         .clipped()
         .containerBackground(for: .widget) {
             Color.gray.opacity(0.1) // Existing background

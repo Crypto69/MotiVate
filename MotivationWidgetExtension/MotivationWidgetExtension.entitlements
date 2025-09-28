@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.ai.myaccessibility.motivate</string>
+		<string>group.myaccessibility.ai.motivate</string>
 	</array>
 	<key>com.apple.security.network.client</key>
 	<true/>

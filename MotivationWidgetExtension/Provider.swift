@@ -67,7 +67,7 @@ struct Provider: TimelineProvider {
         }
         #endif
         
-        let appGroupID = "group.ai.myaccessibility.motivate"
+        let appGroupID = "group.myaccessibility.ai.motivate"
         let userDefaults = UserDefaults(suiteName: appGroupID)
         if userDefaults == nil {
             Self.logger.warning("App Group UserDefaults is nil. This may be a preview, test, or misconfigured context.")

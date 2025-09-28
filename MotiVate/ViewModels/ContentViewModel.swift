@@ -17,7 +17,7 @@ class ContentViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     @Published var isFromOffline: Bool = false
 
-    private let appGroupID = "group.ai.myaccessibility.motivate"
+    private let appGroupID = "group.myaccessibility.ai.motivate"
     private let userDefaultsKey = "selectedCategoryIDs"
 
     init() {
