@@ -100,3 +100,7 @@ build_and_distribute*.sh
 build_log_*.log
 backup_*/
 distribution/
+
+# User-specific Xcode files (ensure these are excluded)
+xcuserdata/
+*.xcuserdatad/
